@@ -33,9 +33,3 @@ app.use(
 app.listen(NODE_PORT, async () => {
   console.log(chalk.bgGreen.white(`APP LISTENING ON PORT ${NODE_PORT}`))
 });
-
-
-
-
-
-
