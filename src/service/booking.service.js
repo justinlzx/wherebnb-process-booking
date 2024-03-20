@@ -9,33 +9,23 @@ export const sendPayment = async ({data}) =>  {
         duration
     } = data
 
-    console.log('data', pricePerNight, name, duration)
-
     let formData = new FormData();
     formData.append('currency', 'sgd');
     formData.append('name', name);
     formData.append('pricePerNight', pricePerNight);
     formData.append('duration', duration);
 
-    await axios({
+    const response = await axios({
         method: 'post',
         url: `${process.env.PAYMENTS_URL}/create-checkout-session`,
         data: formData,
         headers: {
             'Content-Type': 'multipart/form-data'
         },
-        timeout: 500
-    })
-    .then((res) => {
-        console.log('Payment Successful!')
-        return 'Payment Successful!'
-    })
-    .catch(
-        (err) => {
-            console.log('Payment Failed!')
-            throw new Error('Payment Failed!', 500)
-        }
-    )
+        timeout: 5000
+    });
+
+    return response.data;
 };
 
 export const sendNotification = async () => {
@@ -62,7 +52,7 @@ export const sendBooking = async () => {
     })
     .catch(
         (err) => {
-            console.log('Booking Failed!')
+            console.log('Booking Failedsadfasdfds!')
             return Res.errorResponse('Booking Failed!', 500)
         }
     )

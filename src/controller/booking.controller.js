@@ -2,7 +2,7 @@ import { sendPayment, sendBooking } from '../service/booking.service.js'
 import Res from '../Res/response.js';
 
 
-export const createBooking = async (req, res) => {
+export const createBooking = async (req, res, next) => {
     const {
         guestId,
         listingId,
@@ -16,30 +16,38 @@ export const createBooking = async (req, res) => {
         duration 
     } = req.body
 
+
     try {
         await sendPayment({data: {pricePerNight, name, duration}})
-        .then((res) => {
-            console.log('Payment Successful!')
+        .then( (resp) => {
 
-            sendBooking(
-                guestId,
-                listingId,
-                startDate,
-                endDate,
-            )
-            .then ((res) => {
-                    console.log('Booking Successful!')
-                    return res.status('Booking Successful!', 200)
-
-                })
+            // await sendBooking(
+//                 guestId,
+//                 listingId,
+//                 startDate,
+//                 endDate,
+//             )
+//             .then ((resp) => {
+//                 // console.log('Booking Successful!', resp)
+//                 return res.status('Booking Successful!', 200)
+//             })
+            
+            return res.status(200).json({
+                success: true,
+                data: resp
+            })
         })
         .catch((err) => {
-            console.log('Payment Failed!', err)
-            throw new Error('Payment Failed! Try again later', err)
-        })}
+            return res.status(500).json({
+                success: false,
+                message: 'Payment Failed!'
+            })
+        })
+    }
     catch (err) {
-        return res.status('Booking Failed!', 500)
+       next(err)
     }
 };
+
 
 
