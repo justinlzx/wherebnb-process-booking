@@ -9,6 +9,8 @@ export const sendPayment = async ({data}) =>  {
         duration
     } = data
 
+    console.log('data:', data)
+
     let formData = new FormData();
     formData.append('currency', 'sgd');
     formData.append('name', name);
@@ -24,6 +26,8 @@ export const sendPayment = async ({data}) =>  {
         },
         timeout: 5000
     });
+
+    console.log('response:', response.data)
 
     return response.data;
 };
@@ -43,16 +47,17 @@ export const sendNotification = async () => {
     )
 };
 
-export const sendBooking = async () => {
+export const sendBooking = async ({bookingInfo}) => {
 
-    await axios.post(`${process.env.BOOKINGS_URL}/booking`)
+
+    await axios.post(`${process.env.BOOKINGS_URL}/booking`, bookingInfo)
     .then((res) => {
-        console.log('Booking Successful!')
+        console.log(res)
         return Res.successResponse('Booking Successful!', 200)
     })
     .catch(
         (err) => {
-            console.log('Booking Failedsadfasdfds!')
+            console.log(err)
             return Res.errorResponse('Booking Failed!', 500)
         }
     )
