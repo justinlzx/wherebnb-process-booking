@@ -1,4 +1,5 @@
 import { sendPayment, sendBooking } from '../service/booking.service.js'
+import stripe from 'stripe';
 
 
 export const makePayment = async (req, res, next) => {
@@ -57,18 +58,13 @@ export const makePayment = async (req, res, next) => {
 
 export const makeBooking = async (req, res, next) => {
 
-    console.log(req.session)
-    console.log(req.sessionID)
-    const booking = req.session.booking
-    console.log(booking)
     if (booking) {
-
-        const {
-            guestId,
-            listingId,
-            startDate,
-            endDate,
-        } = booking
+    //     const {
+    //         guestId,
+    //         listingId,
+    //         startDate,
+    //         endDate,
+    //     } = booking
 
         await sendBooking({bookingInfo: {
             guestId,
@@ -88,7 +84,6 @@ export const makeBooking = async (req, res, next) => {
         })
        
     } else {
-        console.log('Booking failedasdf!')
         return res.status(404).json({
             success: false,
             message: 'Booking failed!'
@@ -96,3 +91,44 @@ export const makeBooking = async (req, res, next) => {
     }
 };
 
+export const stripeWebHook = async (req, res, next) => {
+
+  try {  
+    
+    const endpointSecret = process.env.STRIPE_SIGNING_SECRET;
+    console.log(endpointSecret)
+
+  const sig = req.headers['stripe-signature'];
+
+  let event;
+
+try {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    console.log(event)
+} catch (err) {
+    console.log(`Webhook Error: ${err.message}`);
+    res.status(400).send(`Webhook Error: ${err.message}`);
+    return 'fail';
+}
+
+  // Handle the event
+  switch (event.type) {
+    case 'checkout.session.completed':
+      const checkoutSessionCompleted = event.data.object;
+      // Then define and call a function to handle the event checkout.session.completed
+
+    console.log('payment success', checkoutSessionCompleted)
+      makeBooking()
+      break;
+
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+  // Return a 200 response to acknowledge receipt of the event
+  return res.status(200)}
+  catch (err) {
+    console.log(err)
+    next(err)
+  }
+}

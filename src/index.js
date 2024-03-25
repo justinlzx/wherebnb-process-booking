@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import cors from 'cors';
 import dotenv from 'dotenv'
 import session from 'express-session';
+import {loadStripe} from '@stripe/stripe-js';
 
 
 dotenv.config()
@@ -15,8 +16,11 @@ app.use(cors({
   credentials: true
 }));
 // app.use(cors())
-app.use(express.json());
+// app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+export const stripe = await loadStripe(process.env.STRIPE_SECRET_KEY);
+
 
 app.use(session({
   secret:'keyboard cat',
