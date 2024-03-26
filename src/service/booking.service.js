@@ -1,4 +1,3 @@
-import Res from '../Res/response.js';
 import axios from 'axios';
 
 export const sendPayment = async ({data}) =>  {
@@ -6,16 +5,25 @@ export const sendPayment = async ({data}) =>  {
     const {
         pricePerNight,
         name,
-        duration
+        duration,
+        guestId,
+        listingId,
+        startDate,
+        endDate,
+        hostId
     } = data
-
-    console.log('data:', data)
 
     let formData = new FormData();
     formData.append('currency', 'sgd');
     formData.append('name', name);
     formData.append('pricePerNight', pricePerNight);
     formData.append('duration', duration);
+    formData.append('guestId', guestId);
+    formData.append('listingId', listingId);
+    formData.append('startDate', startDate);
+    formData.append('endDate', endDate);
+    formData.append('hostId', hostId);
+
 
     const response = await axios({
         method: 'post',
@@ -32,9 +40,10 @@ export const sendPayment = async ({data}) =>  {
     return response.data;
 };
 
-export const sendNotification = async () => {
+export const sendNotification = async (payload) => {
+
     
-    await axios.post(`${process.env.NOTIFICATIONS_URL}/notification`)
+    await axios.post(`${process.env.NOTIFICATIONS_URL}/rabbit`, payload)
     .then((res) => {
         console.log('Notification Sent!')
         return 'Notification Sent!'
@@ -49,16 +58,65 @@ export const sendNotification = async () => {
 
 export const sendBooking = async ({bookingInfo}) => {
 
-
     await axios.post(`${process.env.BOOKINGS_URL}/booking`, bookingInfo)
     .then((res) => {
         console.log(res)
-        return Res.successResponse('Booking Successful!', 200)
+        return 'Booking Successful!'
     })
     .catch(
         (err) => {
             console.log(err)
-            return Res.errorResponse('Booking Failed!', 500)
+            return 'Booking entry failed'
         }
     )
+};
+
+
+export const makeBooking = async ({data}) => {
+
+    const {
+        hostId,
+        guestId,
+        listingId,
+        startDate,
+        endDate,
+    } = data
+
+    try {
+        await sendBooking({bookingInfo: {
+            guestId,
+            hostId,
+            listingId,
+            startDate,
+            endDate,
+        }})
+    } catch{
+        return 'Booking Failed!'
+    }
+   
+    console.log(process.env.ACCOUNTS_URL)
+    try {
+        const guestInfo = await axios.get(`${process.env.ACCOUNTS_URL}/view/${guestId}`)
+
+        const hostInfo = await axios.get(`${process.env.ACCOUNTS_URL}/view/${hostId}`)
+
+        const payload = {
+            emailType: "bookingConfirmation",
+            travelerEmail: guestInfo.data.email,
+            travelerName: guestInfo.data.firstName,
+            hostEmail: hostInfo.data.email,
+            hostName: hostInfo.data.firstName,
+            bookingDates: "3 May",
+            totalPrice: "400",
+        }
+
+        sendNotification(payload)
+    } catch (err){
+        console.log(err)
+        return 'Notification Failed!'
+    }
+    finally {
+        return 'Process complete!'
+    }
+  
 };
