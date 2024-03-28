@@ -69,6 +69,7 @@ export const paymentProcessWebhook = async (req, res, next) => {
                 listingId,
                 startDate,
                 endDate,
+                totalPrice
             } = checkoutSessionCompleted.metadata
             await makeBooking({
                 data: {
@@ -76,7 +77,8 @@ export const paymentProcessWebhook = async (req, res, next) => {
                     hostId,
                     listingId,
                     startDate,
-                    endDate
+                    endDate,
+                    totalPrice
                 }
             })
             break;

@@ -3,7 +3,6 @@ import { routes } from './routes/index.js';
 import chalk from 'chalk';
 import cors from 'cors';
 import dotenv from 'dotenv'
-import session from 'express-session';
 import {loadStripe} from '@stripe/stripe-js';
 
 
@@ -18,19 +17,6 @@ app.use(cors({
 app.use(express.urlencoded({ extended: true }));
 
 export const stripe = await loadStripe(process.env.STRIPE_SECRET_KEY);
-
-
-app.use(session({
-  secret:'keyboard cat',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { 
-    maxAge: 86400000,
-    secure: false,
-    sameSite: 'lax'
-  },
-  httpOnly: true
-}));
 
 app.use('/', routes)
 

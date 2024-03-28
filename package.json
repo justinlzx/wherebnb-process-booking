@@ -17,7 +17,6 @@
     "debug": "~2.6.9",
     "dotenv": "^16.4.5",
     "express": "^4.18.2",
-    "express-session": "^1.18.0",
     "firebase": "^10.6.0",
     "http-errors": "~1.6.3",
     "install": "^0.13.0",

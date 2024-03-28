@@ -42,7 +42,7 @@ export const sendPayment = async ({data}) =>  {
 
 export const sendNotification = async (payload) => {
 
-    
+    console.log('payload:', payload)
     await axios.post(`${process.env.NOTIFICATIONS_URL}/rabbit`, payload)
     .then((res) => {
         console.log('Notification Sent!')
@@ -80,6 +80,7 @@ export const makeBooking = async ({data}) => {
         listingId,
         startDate,
         endDate,
+        totalPrice
     } = data
 
     try {
@@ -89,25 +90,25 @@ export const makeBooking = async ({data}) => {
             listingId,
             startDate,
             endDate,
+            totalPrice
         }})
     } catch{
         return 'Booking Failed!'
     }
    
-    console.log(process.env.ACCOUNTS_URL)
     try {
         const guestInfo = await axios.get(`${process.env.ACCOUNTS_URL}/view/${guestId}`)
 
         const hostInfo = await axios.get(`${process.env.ACCOUNTS_URL}/view/${hostId}`)
-
+        
         const payload = {
             emailType: "bookingConfirmation",
-            travelerEmail: guestInfo.data.email,
-            travelerName: guestInfo.data.firstName,
-            hostEmail: hostInfo.data.email,
-            hostName: hostInfo.data.firstName,
-            bookingDates: "3 May",
-            totalPrice: "400",
+            travelerEmail: guestInfo.data.data.email,
+            travelerName: guestInfo.data.data.firstName,
+            hostEmail: hostInfo.data.data.email,
+            hostName: hostInfo.data.data.firstName,
+            bookingDates: startDate,
+            totalPrice,
         }
 
         sendNotification(payload)
