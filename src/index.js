@@ -3,13 +3,21 @@ import { routes } from './routes/index.js';
 import chalk from 'chalk';
 import cors from 'cors';
 import dotenv from 'dotenv'
+import {loadStripe} from '@stripe/stripe-js';
+
+
 dotenv.config()
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.urlencoded({ extended: true }));
+
+export const stripe = await loadStripe(process.env.STRIPE_SECRET_KEY);
+
 app.use('/', routes)
 
 const ENV = process.env
