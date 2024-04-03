@@ -10,7 +10,8 @@ export const sendPayment = async ({data}) =>  {
         listingId,
         startDate,
         endDate,
-        hostId
+        hostId,
+        propertyName
     } = data
 
     let formData = new FormData();
@@ -23,6 +24,7 @@ export const sendPayment = async ({data}) =>  {
     formData.append('startDate', startDate);
     formData.append('endDate', endDate);
     formData.append('hostId', hostId);
+    formData.append('propertyName', propertyName);
 
 
     const response = await axios({
@@ -80,9 +82,11 @@ export const makeBooking = async ({data}) => {
         listingId,
         startDate,
         endDate,
-        totalPrice
+        totalPrice,
+        propertyName
     } = data
 
+    console.log('dog', data)
     try {
         await sendBooking({bookingInfo: {
             guestId,
@@ -97,18 +101,20 @@ export const makeBooking = async ({data}) => {
     }
    
     try {
+        
         const guestInfo = await axios.get(`${process.env.ACCOUNTS_URL}/view/${guestId}`)
-
         const hostInfo = await axios.get(`${process.env.ACCOUNTS_URL}/view/${hostId}`)
         
         const payload = {
             emailType: "bookingConfirmation",
             travelerEmail: guestInfo.data.data.email,
             travelerName: guestInfo.data.data.firstName,
+            propertyName,
             hostEmail: hostInfo.data.data.email,
             hostName: hostInfo.data.data.firstName,
-            bookingDates: startDate,
-            totalPrice,
+            bookingStart: formatDate(startDate),
+            bookingEnd: formatDate(endDate),
+            totalPrice: totalPrice / 100, //convert to dollars
         }
 
         sendNotification(payload)
@@ -119,5 +125,15 @@ export const makeBooking = async ({data}) => {
     finally {
         return 'Process complete!'
     }
-  
 };
+
+export const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const formattedDate = date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+
+    return formattedDate;
+}

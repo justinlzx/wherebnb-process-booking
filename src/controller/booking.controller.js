@@ -1,5 +1,6 @@
 import { sendPayment, makeBooking } from '../service/booking.service.js'
 import stripe from 'stripe';
+import Res from '../Res/response.js'
 
 
 export const makePayment = async (req, res, next) => {
@@ -9,21 +10,15 @@ export const makePayment = async (req, res, next) => {
         listingId,
         startDate,
         endDate,
-        firstName,
-        lastName, 
-        email,
         pricePerNight,
-        name: listingName,
+        name: propertyName,
         duration 
     } = req.body
 
     try {
-        await sendPayment({data: {pricePerNight, listingName, duration, guestId, listingId, hostId, startDate, endDate}})
+        await sendPayment({data: {pricePerNight, propertyName, duration, guestId, listingId, hostId, startDate, endDate}})
         .then((resp) => {
-            return res.status(200).json({
-                success: true,
-                data: resp
-            })
+            return Res.successResponse(res, resp)
         })
         .catch((err) => {
             return res.status(500).json({
@@ -69,7 +64,8 @@ export const paymentProcessWebhook = async (req, res, next) => {
                 listingId,
                 startDate,
                 endDate,
-                totalPrice
+                totalPrice,
+                propertyName
             } = checkoutSessionCompleted.metadata
             await makeBooking({
                 data: {
@@ -78,7 +74,8 @@ export const paymentProcessWebhook = async (req, res, next) => {
                     listingId,
                     startDate,
                     endDate,
-                    totalPrice
+                    totalPrice,
+                    propertyName
                 }
             })
             break;
